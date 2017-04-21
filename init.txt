@@ -1,0 +1,5 @@
+
+create database nodejs;
+
+grant all privileges on koa_mysql.* to 'www'@'%' identified by 'www';
+grant all privileges on test.* to 'www'@'%' identified by 'www';

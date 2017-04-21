@@ -5,8 +5,8 @@ const templating = require('./templating');
 const app = new Koa();
 const isProduction = process.env.NODE_ENV === 'production';
 //
-const Sequelize = require('sequelize');
 const config = require('./config');
+const model = require('./model');
 
 
 
@@ -47,79 +47,99 @@ app.use(templating('views',{
     watch: !isProduction
 }));
 
-// 第一步，创建一个sequelize对象实例：
-var sequelize = new Sequelize(config.database, config.username, config.password, {
-    host: config.host,
-    dialect: 'mysql',
-    pool: {
-        max: 5,
-        min: 0,
-        idle: 30000
-    }
-});
+
 // 第二步，定义模型Pet，告诉Sequelize如何映射数据库表：
-var Pet = sequelize.define('pet', {
-    id:{
-        type: Sequelize.STRING(50),
-        primaryKey: true
-    },
-    name: Sequelize.STRING(100),
-    gender: Sequelize.BOOLEAN,
-    birth: Sequelize.STRING(10),
-    createdAt: Sequelize.BIGINT,
-    updatedAt: Sequelize.BIGINT,
-    version: Sequelize.BIGINT
-},{
-    timestamps: false
-});
+// var Pet = sequelize.define('pet', {
+//     id:{
+//         type: Sequelize.STRING(50),
+//         primaryKey: true
+//     },
+//     name: Sequelize.STRING(100),
+//     gender: Sequelize.BOOLEAN,
+//     birth: Sequelize.STRING(10),
+//     createdAt: Sequelize.BIGINT,
+//     updatedAt: Sequelize.BIGINT,
+//     version: Sequelize.BIGINT
+// },{
+//     timestamps: false
+// });
 //第三步，往数据库加数据
-var now = Date.now();
-(async () => {
-    var dog = await Pet.create({
-        id: 'd-' + now,
-        name: '0die',
-        gender: false,
-        birth: '2017-04-21',
-        createdAt: now,
-        updatedAt: now,
-        version: 0
-    });
-    console.log('created: ' + JSON.stringify(dog))
-})();
+// var now = Date.now();
+// (async () => {
+//     var dog = await Pet.create({
+//         id: 'd-' + now,
+//         name: '0die',
+//         gender: false,
+//         birth: '2017-04-21',
+//         createdAt: now,
+//         updatedAt: now,
+//         version: 0
+//     });
+//     console.log('created: ' + JSON.stringify(dog))
+// })();
 //第四步，查询数据
-(async () => {
-    var pets = await Pet.findAll({
-        where:{
-            name: 'Gaffey'
-        }
-    });
-    console.log(`find ${pets.length} pets:`);
-    for (let p of pets){
-        console.log(JSON.stringify(p));
-        console.log('update pet...');
-        p.gender = true;
-        p.updatedAt = Date.now();
-        p.version ++;
-        await p.save();
-        if (p.version === 3) {
-            await p.destroy();
-            console.log(`${p.name} was destroyed.`);
-        }
-    }
-})();
+// (async () => {
+//     var pets = await Pet.findAll({
+//         where:{
+//             name: 'Gaffey'
+//         }
+//     });
+//     console.log(`find ${pets.length} pets:`);
+//     for (let p of pets){
+//         console.log(JSON.stringify(p));
+//         console.log('update pet...');
+//         p.gender = true;
+//         p.updatedAt = Date.now();
+//         p.version ++;
+//         await p.save();
+//         if (p.version === 3) {
+//             await p.destroy();
+//             console.log(`${p.name} was destroyed.`);
+//         }
+//     }
+// })();
 //更新数据
-(async () => {
-    var p = await queryFromSomewhere();
-    p.gender = true;
-    p.updatedAt = Date.now();
-    p.version ++;
-    await p.save();
-})();
+// (async () => {
+//     var p = await queryFromSomewhere();
+//     p.gender = true;
+//     p.updatedAt = Date.now();
+//     p.version ++;
+//     await p.save();
+// })();
 // 删除数据
+// (async () => {
+//     var p = await queryFromSomewhere();
+//     await p.destroy();
+// })();
+
+let
+    Pet = model.Pet,
+    User = model.User;
+
 (async () => {
-    var p = await queryFromSomewhere();
-    await p.destroy();
+    var user = await User.create({
+        name: 'John',
+        gender: false,
+        email: 'john-' + Date.now() + '@garfield.pet',
+        passwd: 'hahaha'
+    });
+    console.log('created: ' + JSON.stringify(user));
+    var cat = await Pet.create({
+        ownerId: user.id,
+        name: 'Garfield',
+        gender: false,
+        birth: '2007-07-07',
+    });
+    console.log('created: ' + JSON.stringify(cat));
+    var dog = await Pet.create({
+        ownerId: user.id,
+        name: 'Odie',
+        gender: false,
+        birth: '2008-08-08',
+    });
+    console.log('created: ' + JSON.stringify(dog));
 })();
+
 
 //add controllers:
 app.use(controller());

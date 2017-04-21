@@ -1,1 +1,6 @@
 /node_modules
+.gitignore.swp
+.idea/hello_koa2.0.iml
+.idea/modules.xml
+.idea/workspace.xml
+
